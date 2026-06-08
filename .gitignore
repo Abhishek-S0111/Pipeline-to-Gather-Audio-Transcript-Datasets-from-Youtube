@@ -3,3 +3,4 @@ modules
 .env
 secrets
 archive
+.ipynb_checkpoints
