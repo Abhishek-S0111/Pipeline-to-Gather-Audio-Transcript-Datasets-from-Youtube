@@ -71,9 +71,3 @@ Example sample transcripts are placed in `Sample_Transcripts/`.
 
 ## License
 Use and adapt this code for research and dataset creation. Add an explicit license file if you intend to redistribute the dataset or code for other purposes.
-
----
-If you'd like, I can now:
-- generate a `requirements.txt` from the notebook's installed packages,
-- add a short example `requirements.txt` and a one-line usage example, or
-- open a PR-style diff for review.
