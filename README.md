@@ -1,103 +1,56 @@
 # YouTube Audio & Transcript Dataset Extraction Pipeline (YADEP)
 
-This repository hosts a Jupyter notebook pipeline to collect YouTube video metadata, download audio tracks, and prepare the dataset for speech transcription. It is designed for curated dataset creation, especially for Indian-language YouTube content.
+A lightweight Jupyter/Colab pipeline to collect YouTube metadata, download audio tracks, and prepare an audio+transcript dataset. YADEP is aimed at curated dataset creation (examples and samples in this repo use KrishiDarshan content).
 
-## Table of contents
+**Highlights:**
+- Builds a CSV catalog of YouTube videos (`YT_DATASET.csv`).
+- Downloads audio (MP3) per video and organizes files under `KrishiDarshan/`.
+- Includes example transcripts and transcription recipes using Whisper-style models.
 
-- [What this project does](#what-this-project-does)
-- [Repository contents](#repository-contents)
-- [Pipeline workflow](#pipeline-workflow)
-- [Key notebook sections](#key-notebook-sections)
-- [Requirements](#requirements)
-- [Quick start](#quick-start)
-- [Usage instructions](#usage-instructions)
-- [Dataset output structure](#dataset-output-structure)
-- [Notes and caveats](#notes-and-caveats)
-- [Sample files](#sample-files)
-- [License](#license)
+## Contents
+- `Youtube_Audio_Dataset_Extraction_Pipeline_(YADEP).ipynb` — primary pipeline notebook
+- `YT_DATASET.csv` — sample/generated dataset (created when you run the notebook)
+- `KrishiDarshan/` — downloaded audio organized by video ID
+- `Sample_Transcripts/` — example transcript outputs
+- Helper notebooks: `Helper_Notebook_to_download_Audio_from_YT.ipynb`, `Hindi_Speech_Dataset_Cleaner_and_Downloader.ipynb`
 
-## What this project does
+## Quick start (Colab or local)
 
-- Collects YouTube video metadata from channels, playlists, or individual video URLs
-- Builds a CSV dataset with video IDs, titles, links, durations, and channel names
-- Downloads audio-only MP3 files from selected YouTube videos
-- Organizes audio files in a dataset folder structure
-- Provides notebook code for transcription using Whisper-style models via Hugging Face
+1. Open [Youtube_Audio_Dataset_Extraction_Pipeline_(YADEP).ipynb](Youtube_Audio_Dataset_Extraction_Pipeline_(YADEP).ipynb) in Jupyter or Colab.
+2. Run the first cell to install dependencies (Colab) or run the equivalent local install below.
 
-## Repository contents
+Local install (recommended in a virtualenv):
 
-- `Youtube_Audio_Dataset_Extraction_Pipeline_(YADEP).ipynb` - main notebook implementing the pipeline
-- `YT_DATASET.csv` - generated dataset file (created when notebook runs)
-- `KrishiDarshan.zip` - archived audio dataset bundle
-- `BfMmAW-58ng_Indic_Whisper.txt` - sample transcript output for one video
-- `BfMmAW-58ng_whisper_large_v3.txt` - sample Whisper transcript output
-- `BfMmAW-58ng_whisper_large_v3_turbo.txt` - sample Whisper Turbo transcript output
-- `ET8rwerJTg0_whisper_large_v3.txt` - sample transcript output
-- `ET8rwerJTg0_whisper_large_v3_turbo.txt` - sample transcript output
-- `sample_transcript.txt` - example transcript text
+```
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+# if ffmpeg missing on Windows, install via choco/scoop or download from ffmpeg.org
+```
 
-## Pipeline workflow
+Minimal required Python packages (see notebook install cell for full list): `yt-dlp`, `pandas`, `pydub`, `youtube-transcript-api`, `ffmpeg` (system binary). Optional: `transformers`, `torch`, `whisper-jax` for transcription.
 
-1. Install Python and required packages
-2. Provide YouTube sources interactively in the notebook
-3. Extract video metadata using `yt-dlp`
-4. Save metadata into `YT_DATASET.csv`
-5. Download audio for each video as MP3 into `KrishiDarshan/<VIDEO_ID>/`
-6. Optionally generate transcripts using Whisper-style speech recognition models
+## How it works (high level)
 
-## Key notebook sections
+1. Provide YouTube sources (channel IDs, playlist URLs, or individual video URLs) in the notebook's `Get_Sources()` prompt.
+2. Notebook extracts metadata with `yt-dlp` and saves rows to `YT_DATASET.csv`.
+3. Use the audio download cells to save MP3 files to `KrishiDarshan/<VIDEO_ID>/`.
+4. Optionally run transcription cells (Whisper/Hugging Face) to produce per-video transcript text files.
 
-- Module installation and imports
-- `Get_Sources()` prompt to collect YouTube channel, playlist, or video links
-- `extract_video_details()` to build video metadata lists
-- Dataset creation with `pandas` and `YT_DATASET.csv`
-- `Don_Eladio()` audio download function using `yt-dlp`
-- Zip export of downloaded audio
-- Whisper transcription examples using Hugging Face `transformers` and `whisper-jax`
+## Notebooks and useful cells
+- `Get_Sources()` — interactive source collection
+- `extract_video_details()` — build metadata rows for the CSV
+- Audio download cell (`Don_Eladio()` or `yt-dlp` wrapper) — downloads audio and normalizes file layout
+- Transcription examples — commented Hugging Face / Whisper-JAX recipes (adjust for local/Colab paths and available GPU)
 
-## Requirements
-
-The notebook is built to run in Jupyter or Colab. It uses the following tools and libraries:
-
-- Python 3.8+
-- `yt-dlp`
-- `youtube-transcript-api`
-- `pydub`
-- `pandas`
-- `transformers`
-- `torch`
-- `whisper-jax` (optional)
-- `ffmpeg`
-
-In Colab, the notebook installs dependencies with `pip` and uses `apt-get install -y ffmpeg`.
-
-## Quick start
-
-1. Open `Youtube_Audio_Dataset_Extraction_Pipeline_(YADEP).ipynb` in Jupyter or Colab.
-2. Run the installation cell to install required Python packages.
-3. Run the notebook cells in order and enter YouTube source URLs when prompted.
-4. Check `YT_DATASET.csv` for extracted metadata.
-5. Downloaded audio files will appear in `KrishiDarshan/<VIDEO_ID>/`.
-
-## Usage instructions
-
-1. Open `Youtube_Audio_Dataset_Extraction_Pipeline_(YADEP).ipynb` in Jupyter or Colab.
-2. Run the "Module Installation" cell first.
-3. Run the modules and imports cell.
-4. Provide clean YouTube source links when prompted.
-5. Run the video extraction cells to create `YT_DATASET.csv`.
-6. Run the audio download cells to save MP3 files under `KrishiDarshan/`.
-7. Optionally unzip `KrishiDarshan.zip` and run the transcription cells.
-
-## Dataset output structure
-
-The notebook writes downloaded audio files into:
+## Output layout
+Downloaded audio files are written like:
 
 ```
 KrishiDarshan/<VIDEO_ID>/audio_<duration>.mp3
 ```
 
-It also creates a CSV dataset with one row per video including:
+`YT_DATASET.csv` contains at least these columns:
 
 - `YT_VIDEO_ID`
 - `YT_VIDEO_TITLE`
@@ -105,20 +58,22 @@ It also creates a CSV dataset with one row per video including:
 - `Duration`
 - `Channel`
 
+Example sample transcripts are placed in `Sample_Transcripts/`.
+
 ## Notes and caveats
+- Videos longer than ~30 minutes are currently recorded to `videos_LARGE` and skipped by default — adjust the threshold in the notebook if you need longer captures.
+- Transcription recipes reference large Whisper-style models; these are optional and require sufficient compute or cloud access.
+- Some cells assume Colab paths (`/content/...`) — modify paths for local runs on Windows.
 
-- The notebook currently skips videos longer than 30 minutes and records them in `videos_LARGE` for later processing.
-- Transcription examples use `openai/whisper-large-v3-turbo`, but lines are commented out: adapt them to your available compute and model access.
-- The code includes sample Hugging Face transcription workflows for `transformers` and `whisper-jax`.
-- Paths in the notebook assume a Colab-style environment for some transcription cells (`/content/...`). Adjust these if running locally.
-
-## Sample files
-
-The repository includes sample transcript files from example runs to demonstrate expected output formats.
+## Suggested next steps
+- Add a `requirements.txt` (I can generate one from the notebooks). Would you like me to create it?
+- Add a short CONTRIBUTING section if you plan to accept fixes or contributions.
 
 ## License
+Use and adapt this code for research and dataset creation. Add an explicit license file if you intend to redistribute the dataset or code for other purposes.
 
-This project is provided for research, dataset creation, and transcription experimentation. Use and adapt it freely for non-commercial and academic work, and add your own license header if you publish or distribute it more broadly.
-
-
-This project is provided for research, dataset creation, and transcription experimentation. Feel free to use and adapt it for audio-transcript dataset pipelines.
+---
+If you'd like, I can now:
+- generate a `requirements.txt` from the notebook's installed packages,
+- add a short example `requirements.txt` and a one-line usage example, or
+- open a PR-style diff for review.
